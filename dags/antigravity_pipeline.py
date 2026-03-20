@@ -7,12 +7,16 @@ from cosmos.constants import TestBehavior
 # Define the connection to dbt profile
 # In CI, we override these to use DuckDB
 # The default path is for the local environment
-DBT_PROJECT_PATH = os.getenv("DBT_PROJECT_PATH", "/home/vscode/workspace/antigravity_project")
+DBT_PROJECT_PATH = os.getenv(
+    "DBT_PROJECT_PATH", "/home/vscode/workspace/antigravity_project"
+)
 DEFAULT_PROFILES_YML = os.path.join(DBT_PROJECT_PATH, "profiles.yml")
 profile_config = ProfileConfig(
     profile_name="antigravity",
     target_name=os.getenv("DBT_TARGET", "prod"),
-    profiles_yml_filepath=os.getenv("DBT_PROFILES_YML", os.path.join(DBT_PROJECT_PATH, "profiles.yml")),
+    profiles_yml_filepath=os.getenv(
+        "DBT_PROFILES_YML", os.path.join(DBT_PROJECT_PATH, "profiles.yml")
+    ),
 )
 
 # Deployment DAG: Builds the Medallion layers and runs associated tests
