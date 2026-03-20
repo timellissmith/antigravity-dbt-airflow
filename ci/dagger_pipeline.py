@@ -3,6 +3,7 @@ import anyio
 import dagger
 from dagger import dag
 
+
 async def main():
     # Initialize the Dagger client
     async with dagger.connection(dagger.Config(log_output=sys.stderr)):
@@ -29,7 +30,17 @@ antigravity:
             .with_exec(["apt-get", "update"])
             .with_exec(["apt-get", "install", "-y", "git", "build-essential"])
             # Install dbt-duckdb for isolated CI runs
-            .with_exec(["pip", "install", "dbt-bigquery==1.11.0", "dbt-duckdb==1.10.1", "pytest", "astronomer-cosmos", "apache-airflow==3.1.8"])
+            .with_exec(
+                [
+                    "pip",
+                    "install",
+                    "dbt-bigquery==1.11.0",
+                    "dbt-duckdb==1.10.1",
+                    "pytest",
+                    "astronomer-cosmos",
+                    "apache-airflow==3.1.8",
+                ]
+            )
             .with_directory("/src", src)
             .with_workdir("/src")
             # Write the CI profile
@@ -52,7 +63,9 @@ antigravity:
 
         # 3. Install dbt dependencies
         print("Installing dbt dependencies...")
-        container = await container.with_exec(["dbt", "deps", "--project-dir", "antigravity_project"]).sync()
+        container = await container.with_exec(
+            ["dbt", "deps", "--project-dir", "antigravity_project"]
+        ).sync()
 
         # Define common dbt flags for CI
         dbt_ci_flags = "--project-dir antigravity_project --profiles-dir /src/ci_profiles --target ci"
@@ -81,7 +94,9 @@ antigravity:
             # 7. Run Airflow DAG tests (Pytest)
             print("Running Airflow DAG tests...")
             # We need to go back to /src for pytest
-            await container.with_workdir("/src").with_exec(["pytest", "-vv", "tests/test_dags.py"]).stdout()
+            await container.with_workdir("/src").with_exec(
+                ["pytest", "-vv", "tests/test_dags.py"]
+            ).stdout()
 
             # Final success
             print("CI/CD Pipeline Completed Successfully!")
@@ -94,6 +109,7 @@ antigravity:
         except Exception as e:
             print(f"ERROR: An unexpected error occurred: {type(e).__name__}: {e}")
             sys.exit(1)
+
 
 if __name__ == "__main__":
     anyio.run(main)
