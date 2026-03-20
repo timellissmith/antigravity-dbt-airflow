@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: dim_researchers
+    description: "Curated dimension table for antigravity researchers."
+    columns:
+      - name: researcher_id
+        tests:
+          - unique
+          - not_null:
+              config:
+                tags: ['prod_test']
+
+  - name: fct_levitation_events
+    description: "Fact table for levitation events, enriched with researcher details."
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null:
+              config:
+                tags: ['prod_test']
+      - name: gravity_g
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -1
+              max_value: 2
+              config:
+                tags: ['prod_test']
+      - name: researcher_id
+        tests:
+          - not_null:
+              config:
+                tags: ['prod_test']

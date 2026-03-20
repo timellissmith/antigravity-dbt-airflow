@@ -1,0 +1,5 @@
+astronomer-cosmos~=1.13.1
+dbt-core~=1.11.0
+dbt-bigquery~=1.11.0
+dagger-io~=0.20.3
+anyio~=4.5.0

@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "ci_antigravity"."main"."raw_researchers" ("researcher_id" integer,"first_name" text,"last_name" text,"email" text,"specialization" text,"joined_at" timestamp without time zone)
+  ;
+    -- dbt seed --
+    
+          COPY "ci_antigravity"."main"."raw_researchers" FROM './seeds/raw_researchers.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  
