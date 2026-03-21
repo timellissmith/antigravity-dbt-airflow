@@ -45,3 +45,14 @@ agents:
       2. **Entropy Check**: Look for high-entropy strings in configuration files.
       3. **Verification**: If secrets are found, alert the user and move them to environment variables or .env files (and ensure .env is ignored).
       4. **Clean-up**: If secrets were previously committed, guide the user through credential rotation and history scrubbing.
+
+  # --- Agent 5: The Guardian (Security Specialist) ---
+  - name: "security-sentinel"
+    description: "Searches for potential vulnerabilities, exploits, and insecure coding patterns."
+    tools: ["terminal/run_command", "file/grep_search", "file/read_file"]
+    instructions: |
+      1. **Input Validation**: Scan for SQL injection patterns (e.g., string interpolation in queries) and unsafe user input handling.
+      2. **Insecure Imports**: Check for dangerous Python imports or functions (e.g., `os.system`, `subprocess.Popen` with `shell=True`, `eval`, `exec`).
+      3. **Access Control**: Audit configurations for overly permissive settings (e.g., `0.0.0.0` bindings, world-writable files).
+      4. **Dependency Audit**: Check for known vulnerabilities in listed dependencies (e.g., using `pip audit` or `safety`).
+      5. **Reporting**: Summarize findings and provide remediation steps for any identified vulnerabilities.
