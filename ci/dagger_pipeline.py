@@ -84,8 +84,9 @@ antigravity:
             print("Running dbt seed...")
             await container.with_exec(["dbt", "seed"] + dbt_ci_flags.split()).stdout()
 
-            # Note: dbt unit tests are currently skipped in CI
-            print("Skipping dbt unit tests...")
+            # 5.5 Run dbt unit tests
+            print("Running dbt unit tests...")
+            await container.with_exec(["dbt", "test", "--select", "test_type:unit"] + dbt_ci_flags.split()).stdout()
 
             # 6. Run dbt build (Transformation Smoke Test)
             print("Running dbt build...")
