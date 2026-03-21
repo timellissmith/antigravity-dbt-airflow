@@ -7,14 +7,29 @@ This repository contains the data engineering pipeline for the Antigravity resea
 The project follows a **Medallion Architecture**:
 
 1.  **Bronze (Raw)**: Raw data ingested from external sources (simulated with dbt seeds).
-    - `raw_telemetry`: Raw force readings and vessel metadata.
-    - `raw_researchers`: Static researcher information.
+    - `raw_telemetry`: Raw force readings, vessel IDs, and location IDs.
+    - `raw_researchers`: Static researcher information including assigned vessels.
+    - `raw_vessels`: Metadata for antigravity vessels.
+    - `raw_locations`: Information about research facilities and regions.
 2.  **Silver (Staging)**: Cleaned and standardized data.
     - `stg_telemetry`: Standardizes gravity readings to G-force.
     - `stg_researchers`: Standardizes names and contact information.
+    - `stg_vessels`: Standardizes vessel commissioning dates.
+    - `stg_locations`: Standardizes facility types and regions.
 3.  **Gold (Curated)**: Business-ready fact and dimension tables.
     - `dim_researchers`: Enriched researcher dimensions with tenure and full names.
-    - `fct_levitation_events`: Attributed levitation events with researcher mapping.
+    - `dim_vessels`: Vessel attributes and calculated age.
+    - `dim_locations`: Research facility details.
+    - `fct_levitation_events`: Enriched fact table mapping events to vessels, locations, and lead researchers.
+
+## Data Modelling
+
+The Antigravity data model is designed to support research analysis into levitation phenomena across different environments and assets.
+
+- **Researchers**: The primary human actors in the system. Each event is attributed to a researcher based on their assigned vessel at the time of the event.
+- **Vessels**: The physical assets (probes, shuttles, drones) performing the measurements. Vessel metadata (type, age) allows for asset-performance correlation.
+- **Locations**: The physical or celestial environments (Moon, Mars, LEO) where experiments take place. This enables environmental impact analysis on antigravity stability.
+- **Levitation Events**: The core transactional data. An event is classified as a "True Levitation" when the recorded gravity falls below 0.1G.
 
 ## Getting Started (Devcontainer)
 
