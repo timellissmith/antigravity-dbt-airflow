@@ -1,0 +1,11 @@
+
+    
+    
+    truncate table "local_antigravity"."main"."raw_locations";
+    -- dbt seed --
+    
+          COPY "local_antigravity"."main"."raw_locations" FROM '/home/vscode/workspace/antigravity_project/seeds/raw_locations.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  

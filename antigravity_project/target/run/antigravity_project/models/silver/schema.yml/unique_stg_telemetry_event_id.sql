@@ -11,20 +11,13 @@
     
     
 
-with dbt_test__target as (
-
-  select event_id as unique_field
-  from `modelling-demo`.`antigravity_dev`.`stg_telemetry`
-  where event_id is not null
-
-)
-
 select
-    unique_field,
+    event_id as unique_field,
     count(*) as n_records
 
-from dbt_test__target
-group by unique_field
+from "local_antigravity"."main"."stg_telemetry"
+where event_id is not null
+group by event_id
 having count(*) > 1
 
 

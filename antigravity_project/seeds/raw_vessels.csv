@@ -1,0 +1,6 @@
+vessel_id,vessel_name,vessel_type,commissioned_at
+V001,icarus,probe,2025-01-15 00:00:00
+V002,daedalus,shuttle,2024-11-20 00:00:00
+V003,hermes,drone,2025-03-01 00:00:00
+V004,artemis,lander,2024-06-10 00:00:00
+V005,voyager,explorer,2023-01-01 00:00:00

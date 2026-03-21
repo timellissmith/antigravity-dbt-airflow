@@ -1,12 +1,10 @@
 
     
     
-    
-    create table "ci_antigravity"."main"."raw_telemetry" ("id" integer,"vessel_name" text,"raw_force_reading" float8,"event_time" timestamp without time zone)
-  ;
+    truncate table "local_antigravity"."main"."raw_telemetry";
     -- dbt seed --
     
-          COPY "ci_antigravity"."main"."raw_telemetry" FROM './seeds/raw_telemetry.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+          COPY "local_antigravity"."main"."raw_telemetry" FROM '/home/vscode/workspace/antigravity_project/seeds/raw_telemetry.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
         
 
 ;

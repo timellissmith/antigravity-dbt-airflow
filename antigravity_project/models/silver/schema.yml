@@ -19,13 +19,29 @@ models:
           - unique
           - not_null
 
+  - name: stg_vessels
+    description: "Standardized vessel metadata."
+    columns:
+      - name: vessel_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_locations
+    description: "Standardized research location data."
+    columns:
+      - name: location_id
+        tests:
+          - unique
+          - not_null
+
 unit_tests:
   - name: test_gravity_standardization
     model: stg_telemetry
     given:
       - input: source('raw_layer', 'raw_telemetry')
         rows:
-          - {raw_force_reading: 9.80665, id: 1, vessel_name: 'Voyager', event_time: '2026-03-18 20:00:00'}
+          - {raw_force_reading: 9.80665, id: 1, vessel_id: 'V001', location_id: 'L001', event_time: '2026-03-18 20:00:00'}
     expect:
       rows:
         - {gravity_g: 1.0, event_id: 1}

@@ -5,7 +5,7 @@
 
 
 select researcher_id
-from `modelling-demo`.`antigravity_dev`.`dim_researchers`
+from "local_antigravity"."main"."dim_researchers"
 where researcher_id is null
 
 

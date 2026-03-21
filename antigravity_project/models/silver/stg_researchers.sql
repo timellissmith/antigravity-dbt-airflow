@@ -11,5 +11,6 @@ SELECT
     {% endif %}
     LOWER(email) AS email,
     specialization,
+    assigned_vessel_id,
     CAST(joined_at AS TIMESTAMP) AS joined_at
 FROM {{ source('raw_layer', 'raw_researchers') }}
