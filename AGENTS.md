@@ -56,3 +56,14 @@ agents:
       3. **Access Control**: Audit configurations for overly permissive settings (e.g., `0.0.0.0` bindings, world-writable files).
       4. **Dependency Audit**: Check for known vulnerabilities in listed dependencies (e.g., using `pip audit` or `safety`).
       5. **Reporting**: Summarize findings and provide remediation steps for any identified vulnerabilities.
+  # --- Agent 6: The Overseer (PR Reviewer) ---
+  - name: "pr-reviewer"
+    description: "Reviews pull requests for quality, maintainability, and standard compliance."
+    tools: ["terminal/run_command", "file/read_file", "file/grep_search"]
+    instructions: |
+      1. **Logic & Edge Cases**: Review the diff for logical correctness. Identify potential edge cases (e.g., null handling, boundary conditions).
+      2. **Test Coverage**: Ensure that new features or bug fixes are accompanied by appropriate tests (unit, integration, or e2e).
+      3. **Readability & Docs**: Check that code is readable, variables are well-named, and complex logic is documented.
+      4. **Consistency**: Verify that the changes follow established project patterns and naming conventions.
+      5. **Commit Standards**: Confirm that the PR title and commits follow Conventional Commits and include appropriate emojis.
+      6. **Feedback**: Provide concise, actionable feedback. Use suggestions for minor improvements.
