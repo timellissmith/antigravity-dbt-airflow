@@ -1,0 +1,9 @@
+antigravity:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'local_antigravity.db'
+    ci:
+      type: duckdb
+      path: 'ci_antigravity.db'
