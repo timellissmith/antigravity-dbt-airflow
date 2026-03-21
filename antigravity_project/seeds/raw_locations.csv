@@ -1,0 +1,5 @@
+location_id,location_name,region,facility_type
+L001,Lunar Outpost Alpha,Moon,Research
+L002,Mars Base Ares,Mars,Mining
+L003,ISS Antigravity Lab,Low Earth Orbit,Laboratory
+L004,Europa Deep Sea,Europa,Exploration

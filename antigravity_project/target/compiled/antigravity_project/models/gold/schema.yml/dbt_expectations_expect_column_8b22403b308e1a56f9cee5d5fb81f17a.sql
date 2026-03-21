@@ -16,7 +16,7 @@
  as expression
 
 
-    from `modelling-demo`.`antigravity_dev`.`fct_levitation_events`
+    from "local_antigravity"."main"."fct_levitation_events"
     
 
 ),

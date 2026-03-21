@@ -1,15 +1,17 @@
 
-
-  create or replace view `modelling-demo`.`antigravity_prod`.`stg_researchers`
-  OPTIONS()
-  as 
+  
+  create view "local_antigravity"."main"."stg_researchers__dbt_tmp" as (
+    
 
 SELECT
     researcher_id,
-    INITCAP(first_name) AS first_name,
-    INITCAP(last_name) AS last_name,
+    
+    first_name,
+    last_name,
+    
     LOWER(email) AS email,
     specialization,
+    assigned_vessel_id,
     CAST(joined_at AS TIMESTAMP) AS joined_at
-FROM `modelling-demo`.`antigravity_prod`.`raw_researchers`;
-
+FROM "local_antigravity"."main"."raw_researchers"
+  );

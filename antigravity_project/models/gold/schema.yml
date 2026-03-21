@@ -12,7 +12,7 @@ models:
                 tags: ['prod_test']
 
   - name: fct_levitation_events
-    description: "Fact table for levitation events, enriched with researcher details."
+    description: "Fact table for levitation events, enriched with researcher, vessel, and location details."
     columns:
       - name: event_id
         tests:
@@ -23,8 +23,9 @@ models:
       - name: gravity_g
         tests:
           - dbt_expectations.expect_column_values_to_be_between:
-              min_value: -1
-              max_value: 2
+              arguments:
+                min_value: -1
+                max_value: 2
               config:
                 tags: ['prod_test']
       - name: researcher_id
@@ -32,3 +33,19 @@ models:
           - not_null:
               config:
                 tags: ['prod_test']
+
+  - name: dim_vessels
+    description: "Dimension table for antigravity vessels."
+    columns:
+      - name: vessel_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_locations
+    description: "Dimension table for research locations."
+    columns:
+      - name: location_id
+        tests:
+          - unique
+          - not_null

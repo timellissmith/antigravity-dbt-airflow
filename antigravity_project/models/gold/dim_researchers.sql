@@ -6,6 +6,7 @@ SELECT
     last_name,
     email,
     specialization,
+    assigned_vessel_id,
     joined_at,
     -- Add a full name for reporting
     CONCAT(first_name, ' ', last_name) AS full_name,
