@@ -8,8 +8,11 @@ models:
         tests:
           - unique
           - not_null
+      - name: vessel_id
+      - name: location_id
       - name: gravity_g
         description: "Gravity reading in Gs (1.0 is standard Earth gravity)."
+      - name: observed_at
 
   - name: stg_researchers
     description: "Standardized researcher information."
@@ -18,6 +21,12 @@ models:
         tests:
           - unique
           - not_null
+      - name: first_name
+      - name: last_name
+      - name: email
+      - name: specialization
+      - name: assigned_vessel_id
+      - name: joined_at
 
   - name: stg_vessels
     description: "Standardized vessel metadata."
