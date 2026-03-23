@@ -23,6 +23,13 @@ jobs:
         uses: dagger/dagger-for-github@v7
         with:
           install-only: true
+          version: "0.20.3"
+
+      - name: Debug Environment
+        run: |
+          ls -R ci/
+          python --version
+          pip list | grep -E "dagger|anyio"
 
       - name: Run Dagger Pipeline
         run: dagger run python ci/dagger_pipeline.py
