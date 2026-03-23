@@ -19,10 +19,12 @@ jobs:
       - name: Install Dagger SDK
         run: pip install dagger-io anyio
 
-      - name: Run Dagger Pipeline
+      - name: Setup Dagger CLI
         uses: dagger/dagger-for-github@v7
         with:
-          verb: run
-          args: python ci/dagger_pipeline.py
+          install-only: true
+
+      - name: Run Dagger Pipeline
+        run: dagger run python ci/dagger_pipeline.py
         env:
           DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
