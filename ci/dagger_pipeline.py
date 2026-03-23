@@ -25,10 +25,10 @@ antigravity:
         # We use a python image and install dbt-bigquery and pytest
         container = (
             dag.container()
-            .from_("python:3.13-slim")
+            .from_("python:3.12-slim")
             .with_env_variable("PIP_NO_CACHE_DIR", "1")
             .with_exec(["apt-get", "update"])
-            .with_exec(["apt-get", "install", "-y", "git", "build-essential"])
+            .with_exec(["apt-get", "install", "-y", "git", "build-essential", "libpq-dev"])
             # Install dbt-duckdb for isolated CI runs
             .with_exec(
                 [
@@ -38,7 +38,7 @@ antigravity:
                     "dbt-duckdb==1.10.1",
                     "pytest",
                     "astronomer-cosmos",
-                    "apache-airflow==3.1.8",
+                    "apache-airflow==2.10.5",
                 ]
             )
             .with_directory("/src", src)
