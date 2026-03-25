@@ -48,7 +48,8 @@ antigravity:
             .with_env_variable("DBT_PROJECT_PATH", "/src/antigravity_project")
             .with_env_variable("AIRFLOW_HOME", "/src/airflow")
             .with_env_variable("AIRFLOW__CORE__DAGS_FOLDER", "/src/dags")
-            .with_env_variable("CI", "true")
+            .with_env_variable("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin")
+            .with_exec(["sh", "-c", "curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update"])
             .with_exec(["airflow", "db", "migrate"])
         )
 
@@ -56,28 +57,28 @@ antigravity:
         container = container.with_workdir("/src")
         
         # 4. Install dbt dependencies
-        print("Installing dbt dependencies...")
-        container = await container.with_exec(["dbt", "deps", "--project-dir", "antigravity_project"]).sync()
+        print("Installing dbt dependencies using dbt-fusion...")
+        container = await container.with_exec(["dbtf", "deps", "--project-dir", "antigravity_project"]).sync()
 
         # Define common dbt flags for CI
         dbt_ci_flags = "--project-dir antigravity_project --profiles-dir /src/ci_profiles --target ci"
 
         try:
-            # 5. Run dbt seed (Verification of data structure)
-            print("Running dbt seed...")
-            container = await container.with_exec(["dbt", "seed"] + dbt_ci_flags.split()).sync()
+            # 5. Run dbt-fusion seed (Verification of data structure)
+            print("Running dbt-fusion seed...")
+            container = await container.with_exec(["dbtf", "seed"] + dbt_ci_flags.split()).sync()
 
-            # 6. Run dbt models (Ensure relations exist for unit test introspection)
-            print("Running dbt models (Silver/Gold)...")
-            container = await container.with_exec(["dbt", "run"] + dbt_ci_flags.split()).sync()
+            # 6. Run dbt-fusion models (Ensure relations exist for unit test introspection)
+            print("Running dbt-fusion models (Silver/Gold)...")
+            container = await container.with_exec(["dbtf", "run"] + dbt_ci_flags.split()).sync()
 
-            # 7. Run dbt unit tests
-            print("Running dbt unit tests...")
-            container = await container.with_exec(["dbt", "test", "--select", "test_type:unit"] + dbt_ci_flags.split()).sync()
+            # 7. Run dbt-fusion unit tests
+            print("Running dbt-fusion unit tests...")
+            container = await container.with_exec(["dbtf", "test", "--select", "test_type:unit"] + dbt_ci_flags.split()).sync()
 
-            # 8. Run dbt generic tests
-            print("Running dbt generic tests...")
-            container = await container.with_exec(["dbt", "test", "--exclude", "test_type:unit"] + dbt_ci_flags.split()).sync()
+            # 8. Run dbt-fusion generic tests
+            print("Running dbt-fusion generic tests...")
+            container = await container.with_exec(["dbtf", "test", "--exclude", "test_type:unit"] + dbt_ci_flags.split()).sync()
 
             # 9. Run Airflow DAG tests (Pytest)
             print("Running Airflow DAG tests...")
