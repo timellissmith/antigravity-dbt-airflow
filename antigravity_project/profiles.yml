@@ -3,7 +3,7 @@ antigravity:
   outputs:
     dev:
       type: duckdb
-      path: 'local_antigravity.db'
+      path: "{{ env_var('DBT_DEV_DB', '/home/vscode/workspace/local_antigravity.db') }}"
     ci:
       type: duckdb
-      path: 'ci_antigravity.db'
+      path: "{{ env_var('DBT_CI_DB', '/home/vscode/workspace/ci_antigravity.db') }}"

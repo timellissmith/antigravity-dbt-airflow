@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/timellissmith/antigravity-dbt-airflow/actions/workflows/ci.yml/badge.svg)](https://github.com/timellissmith/antigravity-dbt-airflow/actions/workflows/ci.yml)
 
-This repository contains the data engineering pipeline for the Antigravity research project. It uses **Airflow**, **Cosmos**, and **dbt** to transform raw telemetry and researcher data into curated gold-layer tables in **BigQuery**.
+This repository contains the data engineering pipeline for the Antigravity research project. It uses **Airflow**, **Cosmos**, and **dbt-fusion** to transform raw telemetry and researcher data into curated gold-layer tables in **BigQuery**.
 
 ## Architecture Overview
 
@@ -51,7 +51,7 @@ This repo is optimized for development using Visual Studio Code Dev Containers.
     - Install necessary dbt packages (e.g., `dbt-expectations`).
 4.  Access the **Airflow UI** at [http://localhost:8080](http://localhost:8080).
 
-## Data Deployment (dbt)
+## Data Deployment (dbt-fusion)
 
 The dbt project is located in the `antigravity_project/` directory.
 
@@ -59,21 +59,21 @@ The dbt project is located in the `antigravity_project/` directory.
 To load the raw research data into your BigQuery environment, run:
 ```bash
 cd antigravity_project
-dbt seed --target dev
+dbtf seed --target dev
 ```
 
 ## Testing Strategy
 
 This project implements testing at multiple levels:
 
-### 1. dbt Unit Tests
+### 1. dbt-fusion Unit Tests
 Used to validate transformation logic in models without requiring a database connection.
 - Defined in `models/silver/schema.yml`.
-- Run using: `dbt test --select test_type:unit`
+- Run using: `dbtf test --select test_type:unit`
 
-### 2. dbt Data Tests
+### 2. dbt-fusion Data Tests
 Generic and singular tests to ensure data quality (unique, not_null, and `dbt_expectations`).
-- Run using: `dbt test --exclude test_type:unit`
+- Run using: `dbtf test --exclude test_type:unit`
 
 ### 3. Airflow DAG Tests (pytest)
 A `pytest` suite in `tests/test_dags.py` validates:

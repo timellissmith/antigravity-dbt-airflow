@@ -1,6 +1,7 @@
 # Antigravity Project Makefile
 
 # Variables
+DBT = dbtf
 DBT_PROJECT_DIR = antigravity_project
 TEST_DIR = tests
 DAG_ID = antigravity_pipeline
@@ -19,20 +20,20 @@ help: ## Display this help screen
 
 install: ## Install python dependencies
 	pip install -r requirements.txt
-	cd $(DBT_PROJECT_DIR) && dbt deps
+	cd $(DBT_PROJECT_DIR) && $(DBT) deps
 
 dbt-seed: ## Load dbt seeds
-	dbt seed --project-dir $(DBT_PROJECT_DIR)
+	$(DBT) seed --project-dir $(DBT_PROJECT_DIR)
 
 dbt-run: ## Run all dbt models
-	dbt run --project-dir $(DBT_PROJECT_DIR)
+	$(DBT) run --project-dir $(DBT_PROJECT_DIR)
 
 dbt-test: ## Run dbt generic and unit tests
-	dbt test --project-dir $(DBT_PROJECT_DIR)
+	$(DBT) test --project-dir $(DBT_PROJECT_DIR)
 
 dbt-build: ## Execute dbt build (seeds, models, snapshots, and tests)
-	dbt seed --project-dir $(DBT_PROJECT_DIR)
-	dbt build --project-dir $(DBT_PROJECT_DIR)
+	$(DBT) seed --project-dir $(DBT_PROJECT_DIR)
+	$(DBT) build --project-dir $(DBT_PROJECT_DIR)
 
 airflow-trigger: ## Trigger the main Airflow pipeline DAG
 	airflow dags trigger $(DAG_ID)
