@@ -1,5 +1,7 @@
 # Antigravity Data Pipeline
 
+[![CI](https://github.com/timellissmith/antigravity-dbt-airflow/actions/workflows/ci.yml/badge.svg)](https://github.com/timellissmith/antigravity-dbt-airflow/actions/workflows/ci.yml)
+
 This repository contains the data engineering pipeline for the Antigravity research project. It uses **Airflow**, **Cosmos**, and **dbt** to transform raw telemetry and researcher data into curated gold-layer tables in **BigQuery**.
 
 ## Architecture Overview
