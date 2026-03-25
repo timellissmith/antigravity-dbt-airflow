@@ -6,9 +6,5 @@ SELECT
     vessel_type,
     commissioned_at,
     -- Calculate vessel age
-    {% if target.type == 'bigquery' %}
-    TIMESTAMP_DIFF(CURRENT_TIMESTAMP(), commissioned_at, DAY) AS age_days
-    {% else %}
-    date_diff('day', commissioned_at, now()) AS age_days
-    {% endif %}
+    date_diff('day', commissioned_at, current_timestamp) AS age_days
 FROM {{ ref('stg_vessels') }}

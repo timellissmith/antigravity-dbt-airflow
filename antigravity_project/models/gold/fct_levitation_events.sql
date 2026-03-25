@@ -1,10 +1,7 @@
-{{ config(materialized='incremental', unique_key='event_id', tags=["deploy"]) }}
+{{ config(materialized='table', tags=["deploy"]) }}
 
 WITH telemetry AS (
     SELECT * FROM {{ ref('stg_telemetry') }}
-    {% if is_incremental() %}
-    WHERE observed_at > (SELECT MAX(observed_at) FROM {{ this }})
-    {% endif %}
 ),
 
 researchers AS (

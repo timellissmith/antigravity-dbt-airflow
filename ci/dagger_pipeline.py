@@ -17,7 +17,7 @@ antigravity:
   outputs:
     ci:
       type: duckdb
-      path: 'ci_antigravity.db'
+      path: '/src/ci_antigravity.db'
 """
 
         # 2. Set up the container environment
@@ -26,7 +26,7 @@ antigravity:
             .from_("python:3.13-slim")
             .with_env_variable("PIP_NO_CACHE_DIR", "1")
             .with_exec(["apt-get", "update"])
-            .with_exec(["apt-get", "install", "-y", "git", "curl", "build-essential", "libpq-dev"])
+            .with_exec(["apt-get", "install", "-y", "git", "curl", "build-essential", "libpq-dev", "jq"])
             .with_exec(
                 [
                     "pip",
@@ -49,7 +49,9 @@ antigravity:
             .with_env_variable("AIRFLOW_HOME", "/src/airflow")
             .with_env_variable("AIRFLOW__CORE__DAGS_FOLDER", "/src/dags")
             .with_env_variable("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin")
-            .with_exec(["sh", "-c", "curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update"])
+            .with_env_variable("SHELL", "/bin/bash")
+            .with_exec(["bash", "-c", "curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | bash -s -- --update"])
+            .with_exec(["ln", "-s", "/root/.local/bin/dbt", "/usr/local/bin/dbtf"])
             .with_exec(["airflow", "db", "migrate"])
         )
 

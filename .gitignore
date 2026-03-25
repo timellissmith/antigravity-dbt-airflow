@@ -9,5 +9,6 @@ target/
 pytest_*.txt
 *.txt
 *.log
+antigravity_project/logs/
 !README.md
 !AGENTS.md
