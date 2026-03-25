@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: raw_layer
     # database: "{{ env_var('GCP_PROJECT_ID', 'your-project-id') }}"
-    database: "{{ env_var('GCP_PROJECT_ID', 'modelling-demo') }}"
+    database: "{{ env_var('GCP_PROJECT_ID', '') }}"
     schema: "{{ env_var('GCP_SCHEMA', 'antigravity_prod') }}"
     tables:
       - name: raw_telemetry

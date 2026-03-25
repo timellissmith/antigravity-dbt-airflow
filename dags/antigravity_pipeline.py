@@ -11,9 +11,14 @@ DBT_PROJECT_PATH = os.getenv(
     "DBT_PROJECT_PATH", "/home/vscode/workspace/antigravity_project"
 )
 DEFAULT_PROFILES_YML = os.path.join(DBT_PROJECT_PATH, "profiles.yml")
+
+# Ensure required environment variables for dbt are set for local execution
+os.environ.setdefault("GCP_SCHEMA", "main")
+os.environ.setdefault("GCP_PROJECT_ID", "")
+
 profile_config = ProfileConfig(
     profile_name="antigravity",
-    target_name=os.getenv("DBT_TARGET", "prod"),
+    target_name=os.getenv("DBT_TARGET", "dev"),
     profiles_yml_filepath=os.getenv(
         "DBT_PROFILES_YML", os.path.join(DBT_PROJECT_PATH, "profiles.yml")
     ),

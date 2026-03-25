@@ -26,7 +26,7 @@ antigravity:
             .from_("python:3.13-slim")
             .with_env_variable("PIP_NO_CACHE_DIR", "1")
             .with_exec(["apt-get", "update"])
-            .with_exec(["apt-get", "install", "-y", "git", "build-essential", "libpq-dev"])
+            .with_exec(["apt-get", "install", "-y", "git", "curl", "build-essential", "libpq-dev"])
             .with_exec(
                 [
                     "pip",
@@ -53,17 +53,13 @@ antigravity:
             .with_exec(["airflow", "db", "migrate"])
         )
 
-        # 3. Project Directory setup (Keep in /src)
-        container = container.with_workdir("/src")
-        
-        # 4. Install dbt dependencies
-        print("Installing dbt dependencies using dbt-fusion...")
-        container = await container.with_exec(["dbtf", "deps", "--project-dir", "antigravity_project"]).sync()
-
         # Define common dbt flags for CI
         dbt_ci_flags = "--project-dir antigravity_project --profiles-dir /src/ci_profiles --target ci"
 
         try:
+            # 4. Install dbt dependencies
+            print("Installing dbt dependencies using dbt-fusion...")
+            container = await container.with_exec(["dbtf", "deps", "--project-dir", "antigravity_project"]).sync()
             # 5. Run dbt-fusion seed (Verification of data structure)
             print("Running dbt-fusion seed...")
             container = await container.with_exec(["dbtf", "seed"] + dbt_ci_flags.split()).sync()

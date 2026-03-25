@@ -6,6 +6,8 @@ __pycache__/
 .gemini/
 target/
 *.db
-dagger_output.txt
-.antigravity*
+pytest_*.txt
+*.txt
+*.log
+!README.md
 !AGENTS.md
