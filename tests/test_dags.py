@@ -58,7 +58,7 @@ def test_quality_audit_structure(dagbag):
 
 @pytest.mark.skipif(
     os.getenv("CI") == "true",
-    reason="dag.test() fails with serialization error in isolated CI",
+    reason="dag.test() failure in isolated Airflow 3 Task SDK environment",
 )
 def test_pipeline_dag_execution(dagbag):
     """Execute the pipeline DAG to ensure tasks pass and yield expected results."""
@@ -72,7 +72,7 @@ def test_pipeline_dag_execution(dagbag):
 
 @pytest.mark.skipif(
     os.getenv("CI") == "true",
-    reason="dag.test() fails with serialization error in isolated CI",
+    reason="dag.test() failure in isolated Airflow 3 Task SDK environment",
 )
 def test_quality_audit_dag_execution(dagbag):
     """Execute the quality audit DAG to ensure tasks pass and yield expected results."""

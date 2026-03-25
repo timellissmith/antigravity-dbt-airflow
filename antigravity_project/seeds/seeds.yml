@@ -1,0 +1,35 @@
+version: 2
+
+seeds:
+  - name: raw_telemetry
+    config:
+      column_types:
+        id: integer
+        vessel_id: varchar
+        raw_force_reading: float
+        location_id: varchar
+        event_time: timestamp
+  - name: raw_vessels
+    config:
+      column_types:
+        vessel_id: varchar
+        vessel_name: varchar
+        vessel_type: varchar
+        commissioned_at: timestamp
+  - name: raw_locations
+    config:
+      column_types:
+        location_id: varchar
+        location_name: varchar
+        region: varchar
+        facility_type: varchar
+  - name: raw_researchers
+    config:
+      column_types:
+        researcher_id: integer
+        first_name: varchar
+        last_name: varchar
+        email: varchar
+        specialization: varchar
+        assigned_vessel_id: varchar
+        joined_at: timestamp

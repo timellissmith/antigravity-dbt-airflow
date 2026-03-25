@@ -1,6 +1,6 @@
-researcher_id,first_name,last_name,email,specialization,assigned_vessel_id,joined_at
-1,Alice,Smith,alice.smith@antigravity.lab,Levitation,V001,2025-01-15 09:00:00
-2,Bob,Jones,BOB.JONES@RESEARCH.ORG,Tachyon,V002,2024-06-12 10:30:00
-3,Charlie,Davis,charlie.davis@physics.edu,Levitation,V001,2025-02-20 08:45:00
-4,Diana,Prince,diana@themyscira.io,Antigravity,V004,2023-11-01 11:00:00
-5,Edward,Nigma,edward@riddler.com,Levitation,V003,2025-03-10 14:00:00
+"researcher_id","first_name","last_name","email","specialization","assigned_vessel_id","joined_at"
+"1","Alice","Smith","alice.smith@antigravity.lab","Levitation","V001","2025-01-15 09:00:00"
+"2","Bob","Jones","BOB.JONES@RESEARCH.ORG","Tachyon","V002","2024-06-12 10:30:00"
+"3","Charlie","Davis","charlie.davis@physics.edu","Levitation","V001","2025-02-20 08:45:00"
+"4","Diana","Prince","diana@themyscira.io","Antigravity","V004","2023-11-01 11:00:00"
+"5","Edward","Nigma","edward@riddler.com","Levitation","V003","2025-03-10 14:00:00"
