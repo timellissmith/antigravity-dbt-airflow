@@ -2,6 +2,10 @@ import sys
 import anyio
 import dagger
 from dagger import dag
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(override=True)
 
 
 async def main():
@@ -10,14 +14,20 @@ async def main():
         # 1. Define the project directory
         src = dag.host().directory(".")
 
-        # Define a DuckDB profile for CI environment to avoid BQ auth issues
-        duckdb_profile = """
+        # Define a BigQuery profile for CI environment
+        bigquery_profile = """
 antigravity:
   target: ci
   outputs:
     ci:
-      type: duckdb
-      path: '/src/ci_antigravity.db'
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: "{{ env_var('GCP_SCHEMA', 'ci') }}"
+      threads: 4
+      timeout_seconds: 300
+      location: europe-west2
+      priority: interactive
 """
 
         # 2. Set up the container environment
@@ -32,7 +42,6 @@ antigravity:
                     "pip",
                     "install",
                     "dbt-bigquery==1.11.0",
-                    "dbt-duckdb==1.10.1",
                     "pytest",
                     "astronomer-cosmos",
                     "apache-airflow==3.1.8",
@@ -40,7 +49,7 @@ antigravity:
             )
             .with_directory("/src", src)
             .with_workdir("/src")
-            .with_new_file("/src/ci_profiles/profiles.yml", duckdb_profile)
+            .with_new_file("/src/ci_profiles/profiles.yml", bigquery_profile)
             .with_env_variable("GCP_PROJECT_ID", "ci_antigravity")
             .with_env_variable("GCP_SCHEMA", "main")
             .with_env_variable("DBT_TARGET", "ci")

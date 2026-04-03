@@ -2,8 +2,30 @@ antigravity:
   target: dev
   outputs:
     dev:
-      type: duckdb
-      path: "{{ env_var('DBT_DEV_DB', '/home/vscode/workspace/local_antigravity.db') }}"
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: "{{ env_var('GCP_SCHEMA', 'dev') }}"
+      threads: 4
+      timeout_seconds: 300
+      location: europe-west2
+      priority: interactive
     ci:
-      type: duckdb
-      path: "{{ env_var('DBT_CI_DB', '/home/vscode/workspace/ci_antigravity.db') }}"
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: "{{ env_var('GCP_SCHEMA', 'ci') }}"
+      threads: 4
+      timeout_seconds: 300
+      location: europe-west2
+      priority: interactive
+    prod:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      # dataset: "{{ env_var('GCP_SCHEMA', 'main') }}"
+      dataset: "main"
+      threads: 4
+      timeout_seconds: 300
+      location: europe-west2
+      priority: interactive

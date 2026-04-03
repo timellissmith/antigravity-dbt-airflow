@@ -1,4 +1,5 @@
 # Antigravity Project Makefile
+.DEFAULT_GOAL := help
 
 # Variables
 DBT = dbtf
@@ -6,17 +7,43 @@ DBT_PROJECT_DIR = antigravity_project
 TEST_DIR = tests
 DAG_ID = antigravity_pipeline
 
-# Default Environment Variables for local/CI portability
-export GCP_PROJECT_ID = local_antigravity
-export GCP_SCHEMA = main
-export DBT_TARGET = dev
-export DBT_PROFILES_DIR = $(shell pwd)/$(DBT_PROJECT_DIR)
-export DBT_PROFILES_YML = $(shell pwd)/$(DBT_PROJECT_DIR)/profiles.yml
+# Load environment variables from .env file if it exists
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 
-.PHONY: help install dbt-run dbt-test dbt-build airflow-trigger test-e2e clean
+# Default Environment Variables for local/CI portability (only set if not already in env)
+GCP_PROJECT_ID ?= local_antigravity
+GCP_SCHEMA ?= main
+DBT_TARGET ?= dev
+DBT_PROFILES_DIR ?= $(shell pwd)/$(DBT_PROJECT_DIR)
+DBT_PROFILES_YML ?= $(shell pwd)/$(DBT_PROJECT_DIR)/profiles.yml
+
+.PHONY: help install dbt-run dbt-test dbt-build airflow-trigger test-e2e clean check-env
+
+check-env: ## Verify environment variable resolution
+	@echo "GCP_PROJECT_ID: $(GCP_PROJECT_ID)"
+	@echo "GCP_SCHEMA: $(GCP_SCHEMA)"
+	@echo "DBT_TARGET: $(DBT_TARGET)"
+
+tf-init: ## Initialize Terraform
+	terraform -chdir=terraform init
+
+tf-plan: ## View Cloud Composer infrastructure changes
+	terraform -chdir=terraform plan -var="project_id=$(GCP_PROJECT_ID)"
+
+tf-apply: ## Deploy Cloud Composer infrastructure
+	terraform -chdir=terraform apply -auto-approve -var="project_id=$(GCP_PROJECT_ID)"
+
+tf-destroy: ## Destroy Cloud Composer infrastructure
+	terraform -chdir=terraform destroy -auto-approve -var="project_id=$(GCP_PROJECT_ID)"
+
+deploy: ## Deploy to Cloud Composer using Dagger
+	python ci/deploy_pipeline.py
 
 help: ## Display this help screen
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install python dependencies
 	pip install -r requirements.txt

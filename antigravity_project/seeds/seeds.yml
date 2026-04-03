@@ -5,31 +5,31 @@ seeds:
     config:
       column_types:
         id: integer
-        vessel_id: varchar
-        raw_force_reading: float
-        location_id: varchar
+        vessel_id: string
+        raw_force_reading: NUMERIC
+        location_id: string
         event_time: timestamp
   - name: raw_vessels
     config:
       column_types:
-        vessel_id: varchar
-        vessel_name: varchar
-        vessel_type: varchar
+        vessel_id: string
+        vessel_name: string
+        vessel_type: string
         commissioned_at: timestamp
   - name: raw_locations
     config:
       column_types:
-        location_id: varchar
-        location_name: varchar
-        region: varchar
-        facility_type: varchar
+        location_id: string
+        location_name: string
+        region: string
+        facility_type: string
   - name: raw_researchers
     config:
       column_types:
         researcher_id: integer
-        first_name: varchar
-        last_name: varchar
-        email: varchar
-        specialization: varchar
-        assigned_vessel_id: varchar
+        first_name: string
+        last_name: string
+        email: string
+        specialization: string
+        assigned_vessel_id: string
         joined_at: timestamp
