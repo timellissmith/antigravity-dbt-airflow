@@ -9,7 +9,7 @@ def bq_client():
 def test_dim_researchers_counts(bq_client):
     """Verify dim_researchers has expected data volume."""
     project = os.getenv("GCP_PROJECT_ID", "modelling-demo")
-    dataset = "main" # Assumed target dataset
+    dataset = os.getenv("GCP_SCHEMA", "main")
     
     query = f"SELECT count(*) as cnt FROM `{project}.{dataset}.dim_researchers`"
     query_job = bq_client.query(query)
@@ -23,7 +23,7 @@ def test_dim_researchers_counts(bq_client):
 def test_fct_levitation_events_integrity(bq_client):
     """Ensure no nulls in critical fact columns and reasonable totals."""
     project = os.getenv("GCP_PROJECT_ID", "modelling-demo")
-    dataset = "main"
+    dataset = os.getenv("GCP_SCHEMA", "main")
     
     query = f"""
         SELECT 
@@ -43,7 +43,7 @@ def test_fct_levitation_events_integrity(bq_client):
 def test_regression_vessel_age(bq_client):
     """Business logic check: Verify vessel ages are positive."""
     project = os.getenv("GCP_PROJECT_ID", "modelling-demo")
-    dataset = "main"
+    dataset = os.getenv("GCP_SCHEMA", "main")
     
     query = f"SELECT count(*) as errors FROM `{project}.{dataset}.dim_vessels` WHERE age_days < 0"
     query_job = bq_client.query(query)
