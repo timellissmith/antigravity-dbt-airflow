@@ -5,37 +5,51 @@ models:
     description: "Curated dimension table for antigravity researchers."
     columns:
       - name: researcher_id
+        description: "Unique identifier for the researcher."
         tests:
           - unique
           - not_null:
               config:
                 tags: ['prod_test']
       - name: full_name
+        description: "Researcher's full name (concatenated)."
       - name: email
+        description: "Contact email address."
       - name: specialization
+        description: "Area of expertise (e.g., Propulsion, Gravity Physics)."
       - name: assigned_vessel_id
+        description: "ID of the vessel currently assigned to this researcher."
       - name: tenure_days
+        description: "Days since the researcher joined the project."
 
   - name: fct_levitation_events
     description: "Fact table for levitation events, enriched with researcher, vessel, and location details."
     columns:
       - name: event_id
+        description: "Unique event identifier."
         tests:
           - unique
           - not_null:
               config:
                 tags: ['prod_test']
       - name: vessel_id
+        description: "ID of the vessel that recorded the event."
       - name: vessel_name
+        description: "Name of the vessel at the time of the event."
       - name: location_id
+        description: "ID of the facility where the event occurred."
       - name: location_name
+        description: "Human-readable name of the facility."
       - name: researcher_id
+        description: "ID of the lead researcher for the event."
         tests:
           - not_null:
               config:
                 tags: ['prod_test']
       - name: lead_researcher
+        description: "Name of the lead researcher."
       - name: gravity_g
+        description: "The gravity reading in G units (True levitation is < 0.1G)."
         tests:
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
@@ -44,27 +58,38 @@ models:
               config:
                 tags: ['prod_test']
       - name: observed_at
+        description: "Timestamp when the event was recorded."
       - name: is_levitation_event
+        description: "Boolean flag (1/0) indicating if gravity was < 0.1G."
 
   - name: dim_vessels
     description: "Dimension table for antigravity vessels."
     columns:
       - name: vessel_id
+        description: "Unique vessel identifier."
         tests:
           - unique
           - not_null
       - name: vessel_name
+        description: "Display name of the vessel."
       - name: vessel_type
+        description: "Classification (Shuttle, Drone, Probe)."
       - name: commissioned_at
+        description: "Date when the vessel entered service."
       - name: age_days
+        description: "Operational age of the vessel in days."
 
   - name: dim_locations
     description: "Dimension table for research locations."
     columns:
       - name: location_id
+        description: "Unique location identifier."
         tests:
           - unique
           - not_null
       - name: location_name
+        description: "Official name of the research facility."
       - name: region
+        description: "Geostationary or celestial region (e.g., LEO, Moon)."
       - name: facility_type
+        description: "Type of facility (Orbital, Ground-based)."
