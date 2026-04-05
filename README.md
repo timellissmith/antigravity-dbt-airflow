@@ -8,13 +8,15 @@ This repository contains the data engineering pipeline for the Antigravity resea
 
 The project follows a **Medallion Architecture**:
 
-1.  **Bronze (Raw)**: Raw data ingested from external sources (simulated with dbt seeds).
-    - `raw_telemetry`: Raw force readings, vessel IDs, and location IDs.
+1.  **Bronze (Raw/Streaming)**: Raw data ingested from both static and streaming sources.
+    - `raw_telemetry`: Seeded raw force readings, vessel IDs, and location IDs.
+    - `stg_telemetry_stream`: Real-time telemetry ingested from Pub/Sub via BigQuery Continuous Queries.
     - `raw_researchers`: Static researcher information including assigned vessels.
     - `raw_vessels`: Metadata for antigravity vessels.
     - `raw_locations`: Information about research facilities and regions.
 2.  **Silver (Staging)**: Cleaned and standardized data.
-    - `stg_telemetry`: Standardizes gravity readings to G-force.
+    - `stg_telemetry`: Standardizes gravity readings to G-force (from static bronze).
+    - `stg_telemetry_stream`: Real-time telemetry processed by BigQuery Continuous Queries.
     - `stg_researchers`: Standardizes names and contact information.
     - `stg_vessels`: Standardizes vessel commissioning dates.
     - `stg_locations`: Standardizes facility types and regions.
@@ -23,6 +25,33 @@ The project follows a **Medallion Architecture**:
     - `dim_vessels`: Vessel attributes and calculated age.
     - `dim_locations`: Research facility details.
     - `fct_levitation_events`: Enriched fact table mapping events to vessels, locations, and lead researchers.
+
+---
+
+## Streaming Telemetry Pipeline
+
+This project includes a real-time ingestion layer for vessel telemetry.
+
+### Data Flow
+1.  **Load Generation**: `streaming/generator.py` simulates real-time vessel telemetry.
+2.  **Ingestion**: Events are published to a **Google Cloud Pub/Sub** topic (`antigravity-telemetry`).
+3.  **Continuous Query**: A **BigQuery Continuous Query** job listens for new messages via the `APPENDS` function.
+4.  **Materialization**: The data is streamed directly into the `stg_telemetry_stream` table in BigQuery.
+
+### Management Infrastructure
+- **BigQuery Reservations**: To support Continuous Queries, we use an **Enterprise Edition** reservation with a **1-slot baseline** and **autoscaling to 100 slots**. This ensures high performance while maintaining a low baseline cost.
+- **CQ Lifecycle Manager**: A **Cloud Workflow** (`antigravity-cq-manager`) automatically manages the continuous query jobs (cancels duplicates, ensures continuity).
+
+### Management Commands
+| Target | Description |
+| :--- | :--- |
+| `make stream-infra-apply` | Deploys Pub/Sub, BQ Reservations, and Cloud Workflow infra. |
+| `make stream-generate` | Starts the Python load generator (publishes to Pub/Sub). |
+| `make stream-cq-status` | Checks if the continuous query job is currently running. |
+| `make stream-cq-restart` | Manually triggers the CQ lifecycle workflow. |
+| `make stream-cq-stop` | Identifies and cancels all running continuous query jobs. |
+
+---
 
 ## Data Modelling
 

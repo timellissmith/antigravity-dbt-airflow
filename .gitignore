@@ -10,5 +10,11 @@ pytest_*.txt
 *.txt
 *.log
 antigravity_project/logs/
+antigravity_project/dbt_packages/
+dags/bin/
+logs/
+terraform/.terraform/
+terraform/terraform.tfstate*
+.env
 !README.md
 !AGENTS.md

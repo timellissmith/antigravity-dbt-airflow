@@ -3,3 +3,9 @@ dbt-core~=1.11.0
 dbt-bigquery~=1.11.0
 dagger-io~=0.20.3
 anyio~=4.5.0
+<<<<<<< Updated upstream
+=======
+python-dotenv~=1.0.1
+google-cloud-pubsub~=2.21.0
+pydantic~=2.7.0
+>>>>>>> Stashed changes

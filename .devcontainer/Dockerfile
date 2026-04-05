@@ -8,6 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install Google Cloud SDK
+RUN curl https://sdk.cloud.google.com | bash -s -- --disable-prompts && \
+    ln -s /root/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud && \
+    ln -s /root/google-cloud-sdk/bin/gsutil /usr/local/bin/gsutil && \
+    ln -s /root/google-cloud-sdk/bin/bq /usr/local/bin/bq
+
 # Set Airflow Home
 ENV AIRFLOW_HOME=/home/vscode/airflow
 
