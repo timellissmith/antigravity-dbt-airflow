@@ -7,52 +7,76 @@ sources:
     schema: "{{ env_var('GCP_SCHEMA', 'antigravity_prod') }}"
     tables:
       - name: raw_telemetry
+        description: "Raw force readings and event metadata from antigravity vessels."
         columns:
           - name: id
+            description: "Primary key for raw telemetry."
             data_type: int64
           - name: vessel_id
+            description: "ID of the vessel recording the reading."
             data_type: string
           - name: raw_force_reading
+            description: "Unscaled force reading from the vessel sensors."
             data_type: float64
           - name: location_id
+            description: "ID of the location where the reading occurred."
             data_type: string
           - name: event_time
+            description: "The wall-clock time the reading was taken."
             data_type: timestamp
       - name: raw_researchers
+        description: "Source researcher records from the HR system."
         columns:
           - name: researcher_id
+            description: "Researcher's unique HR identifier."
             data_type: int64
           - name: first_name
+            description: "First name."
             data_type: string
           - name: last_name
+            description: "Last name."
             data_type: string
           - name: email
+            description: "Primary email address."
             data_type: string
           - name: specialization
+            description: "Primary field of study."
             data_type: string
           - name: assigned_vessel_id
+            description: "Current vessel assignment."
             data_type: string
           - name: joined_at
+            description: "Date the researcher joined the team."
             data_type: timestamp
       - name: raw_vessels
+        description: "Inventory of antigravity vessels across all fleets."
         columns:
           - name: vessel_id
+            description: "Fleet-wide unique vessel identifier."
             data_type: string
           - name: vessel_name
+            description: "Callsign of the vessel."
             data_type: string
           - name: vessel_type
+            description: "Class of vessel (Shuttle, Probe, Drone)."
             data_type: string
           - name: commissioned_at
+            description: "Date the vessel entered service."
             data_type: timestamp
       - name: raw_locations
+        description: "Catalog of research facilities and stations."
         columns:
           - name: location_id
+            description: "Facility identifier code."
             data_type: string
           - name: location_name
+            description: "Common name of the station/facility."
             data_type: string
           - name: region
+            description: "Operational sector (e.g., Lunar-1, LEO-Alpha)."
             data_type: string
           - name: facility_type
+            description: "Type of facility (Ground, Orbital, etc)."
             data_type: string
 
   - name: streaming_layer

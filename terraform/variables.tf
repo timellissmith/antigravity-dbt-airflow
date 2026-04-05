@@ -15,7 +15,6 @@ variable "environment_name" {
   type        = string
   default     = "antigravity-composer"
 }
-
 variable "streaming_dataset" {
   description = "BigQuery dataset ID for streaming pipeline (bronze + silver streaming tables)"
   type        = string

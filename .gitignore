@@ -15,6 +15,7 @@ dags/bin/
 logs/
 terraform/.terraform/
 terraform/terraform.tfstate*
-.env
+.env*
+!.env.v3
 !README.md
 !AGENTS.md

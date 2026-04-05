@@ -1,4 +1,5 @@
 # Antigravity Project Makefile
+.DEFAULT_GOAL := help
 
 # Variables
 DBT = dbtf
@@ -6,16 +7,12 @@ DBT_PROJECT_DIR = antigravity_project
 TEST_DIR = tests
 DAG_ID = antigravity_pipeline
 
-# Default Environment Variables for local/CI portability
-export GCP_PROJECT_ID = local_antigravity
-export GCP_SCHEMA = main
-export DBT_TARGET = dev
-export DBT_PROFILES_DIR = $(shell pwd)/$(DBT_PROJECT_DIR)
-export DBT_PROFILES_YML = $(shell pwd)/$(DBT_PROJECT_DIR)/profiles.yml
+# Load environment variables from .env file if it exists
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 
-<<<<<<< Updated upstream
-.PHONY: help install dbt-run dbt-test dbt-build airflow-trigger test-e2e clean
-=======
 # Default Environment Variables for local/CI portability (only set if not already in env)
 GCP_PROJECT_ID ?= local_antigravity
 GCP_SCHEMA ?= main
@@ -88,10 +85,9 @@ tf-destroy: ## Destroy Cloud Composer infrastructure
 
 deploy: ## Deploy to Cloud Composer using Dagger
 	python ci/deploy_pipeline.py
->>>>>>> Stashed changes
 
 help: ## Display this help screen
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install python dependencies
 	pip install -r requirements.txt

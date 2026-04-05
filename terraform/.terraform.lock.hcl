@@ -20,7 +20,6 @@ provider "registry.terraform.io/hashicorp/google" {
     "zh:fec30c095647b583a246c39d557704947195a1b7d41f81e369ba377d997faef6",
   ]
 }
-
 provider "registry.terraform.io/hashicorp/null" {
   version = "3.2.4"
   hashes = [

@@ -5,44 +5,69 @@ models:
     description: "Standardized telemetry data from antigravity vessels."
     columns:
       - name: event_id
+        description: "Primary key for the telemetry event."
         tests:
           - unique
           - not_null
       - name: vessel_id
+        description: "Foreign key to the vessel."
       - name: location_id
+        description: "Foreign key to the location."
       - name: gravity_g
         description: "Gravity reading in Gs (1.0 is standard Earth gravity)."
       - name: observed_at
+        description: "Timestamp of the observation."
 
   - name: stg_researchers
     description: "Standardized researcher information."
     columns:
       - name: researcher_id
+        description: "Primary key for researchers."
         tests:
           - unique
           - not_null
       - name: first_name
+        description: "Researcher's first name."
       - name: last_name
+        description: "Researcher's last name."
       - name: email
+        description: "Standardized email address."
       - name: specialization
+        description: "Scientific specialization."
       - name: assigned_vessel_id
+        description: "Vessel assigned to the researcher."
       - name: joined_at
+        description: "Date the researcher joined the antigravity project."
 
   - name: stg_vessels
     description: "Standardized vessel metadata."
     columns:
       - name: vessel_id
+        description: "Primary key for vessels."
         tests:
           - unique
           - not_null
+      - name: vessel_name
+        description: "Standardized vessel name."
+      - name: vessel_type
+        description: "One of Shuttle, Drone, or Probe."
+      - name: commissioned_at
+        description: "Date the vessel was first commissioned."
 
   - name: stg_locations
     description: "Standardized research location data."
     columns:
       - name: location_id
+        description: "Primary key for locations."
         tests:
           - unique
           - not_null
+      - name: location_name
+        description: "Official location name."
+      - name: region
+        description: "Celestial or atmospheric region."
+      - name: facility_type
+        description: "Type of facility (Orbital or Ground)."
 
   - name: stg_telemetry_stream
     description: >

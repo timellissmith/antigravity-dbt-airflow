@@ -115,37 +115,65 @@ Run the full suite:
 pytest tests/test_dags.py
 ```
 
-## CI/CD Pipeline (Dagger)
+## Environment Configuration (.env)
 
-This project includes a containerized CI/CD pipeline built with **Dagger**. It allows you to run all tests and builds in an isolated, reproducible environment.
+This project uses `python-dotenv` to manage environment variables. A template is provided in `.env.v3`.
 
-### Pipeline Overview
-The pipeline (`ci/dagger_pipeline.py`) performs the following steps:
-1.  **Environment Setup**: Spins up a container with all dependencies installed.
-2.  **dbt Unit Tests**: Validates transformation logic and specific expectations.
-3.  **dbt Seed & Build**: Loads sample data and builds models.
-4.  **Airflow Validation**: Runs the `pytest` suite to ensure DAGs are correctly structured and executable.
+### Setup
+1.  Copy the template: `cp .env.v3 .env`
+2.  Edit `.env` to set your `GCP_PROJECT_ID` (default: `modelling-demo`).
+3.  Variables in `.env` are automatically loaded by:
+    -   The `Makefile` (top-level commands).
+    -   The Airflow DAGs (`antigravity_pipeline.py`).
+    -   The Dagger CI pipeline (`dagger_pipeline.py`).
 
-### Environment Setup
-The Dagger pipeline requires a **Docker Engine**. We've added the `docker-in-docker` feature to the devcontainer configuration. 
+Run `make check-env` to verify your current settings.
 
-If you are running inside the devcontainer and encounter a "Failed to start Dagger engine session" error, you must **rebuild the container**:
-1.  Open the Command Palette (`Ctrl+Shift+P`).
-2.  Type and select: **Dev Containers: Rebuild Container**.
+## Infrastructure as Code (Terraform)
 
-### How to Run
-Once the environment is ready, run the pipeline with:
-```bash
-python ci/dagger_pipeline.py
-```
+The Cloud Composer 3 environment is managed via Terraform in the `terraform/` directory.
+
+### Configuration
+- **Composer Version**: Composer 3
+- **Airflow Version**: Airflow 3
+- **Region**: `europe-west2`
+- **Environment Size**: `ENVIRONMENT_SIZE_MEDIUM`
+
+### Management Commands
+Use the following `make` targets to manage infrastructure:
+- `make tf-init`: Initialize Terraform providers.
+- `make tf-plan`: View proposed infrastructure changes.
+- `make tf-apply`: Deploy or update the environment (auto-approved).
+- `make tf-destroy`: Tear down the environment (auto-approved).
+- `make deploy`: Deploy code to Composer and run validation/regression tests.
 
 > [!NOTE]
-> Since Dagger requires a Docker daemon, this pipeline will only run in environments that support Docker-in-Docker or have access to the host's Docker socket.
+> `make deploy` requires the `COMPOSER_BUCKET` environment variable to be set (or automatically retrieved from Terraform).
+
+## CI/CD and Regression Testing
+
+The deployment pipeline (`ci/deploy_pipeline.py`) includes multiple validation layers:
+1.  **DAG Integrity**: Runs `pytest tests/test_dags.py` to catch syntax or Airflow import errors.
+2.  **Shadow Build**: Executes `dbtf build --target prod` to verify transformation logic against real BigQuery data.
+3.  **Data Regression**: Runs `pytest tests/regression_tests.py` to ensure:
+    -   Key tables are not empty.
+    -   Fact tables have no null keys.
+    -   Calculated metrics (like vessel age) are logically sound.
+
+## CI/CD Pipeline (Dagger)
+
+The CI/CD pipeline (`ci/dagger_pipeline.py`) has been upgraded to support **dbt-fusion**.
+
+### Key Improvements
+- **Fusion Engine**: Uses `dbtf` for high-performance builds and unit testing.
+- **Environment Parity**: Automatically loads `.env` variables using `override=True` to ensure local Dagger runs match project settings.
+- **Dependency Handling**: The CI container now includes `jq` and correctly configured shell aliases for the Fusion CLI.
+
+---
 
 ## Key Fixes & Design Decisions
 
-- **Join Logic**: `fct_levitation_events` uses a `QUALIFY` clause to avoid event duplication when multiple researchers share a 'Levitation' specialization.
-- **Connection Method**: Production targets use `method: oauth` for seamless integration with Cloud Composer worker service accounts.
-- **Test Tagging**: Critical production tests are tagged with `prod_test` for isolation in the audit DAG.
-- **Devcontainer Fix (Hang)**: Resolved a build hang by removing the redundant `git` feature (pre-installed in the base image) and removing the `USER vscode` instruction from the `Dockerfile`, ensuring devcontainer features install with proper root permissions.
-- **Dagger Support**: Includes the `docker-in-docker` feature to support local Dagger engine sessions for CI/CD pipeline validation.
+- **Materialization**: `fct_levitation_events` uses `table` materialization for optimized performance.
+- **Fusion Compatibility**: Simplified date-math logic in `dim_vessels` and `dim_researchers` to ensure compatibility with the `dbt-fusion` 2.0 parser.
+- **Makefile Usability**: Running `make` without arguments now displays a formatted help screen with all available targets.
+- **Devcontainer Fix**: Resolved an installation hang by removing redundant features and refining the `Dockerfile` permission model.

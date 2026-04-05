@@ -18,6 +18,9 @@ clean-targets:
 
 models:
   antigravity_project:
+    +persist_docs:
+      relation: true
+      columns: true
     bronze:
       +tags: ["deploy"]
     silver:
