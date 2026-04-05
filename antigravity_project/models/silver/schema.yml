@@ -69,7 +69,44 @@ models:
       - name: facility_type
         description: "Type of facility (Orbital or Ground)."
 
+  - name: stg_telemetry_stream
+    description: >
+      Real-time telemetry events processed by the BigQuery Continuous Query.
+      Populated continuously from streaming.raw_telemetry_stream (Pub/Sub → BQ).
+      This view is infrastructure-managed; dbt provides docs and tests only.
+    config:
+      tags: ["streaming"]
+    columns:
+      - name: event_id
+        description: "Normalised event ID from the bronze table."
+        tests:
+          - not_null
+      - name: vessel_id
+        description: "Vessel identifier — references dim_vessels."
+        tests:
+          - not_null
+      - name: location_id
+        description: "Location identifier — references dim_locations."
+        tests:
+          - not_null
+      - name: gravity_g
+        description: "Force reading converted to Standard Gravity (G)."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -2
+              max_value: 10
+      - name: observed_at
+        description: "Parsed event timestamp from the generator."
+        tests:
+          - not_null
+      - name: processed_at
+        description: "Timestamp when the Continuous Query processed this row."
+        tests:
+          - not_null
+
 unit_tests:
+
   - name: test_gravity_standardization
     model: stg_telemetry
     given:

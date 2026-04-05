@@ -1,0 +1,105 @@
+# ==============================================================
+# Cloud Workflow: Antigravity CQ Lifecycle Manager
+# ==============================================================
+# This workflow is triggered by two Cloud Scheduler jobs:
+#   1. Proactive restart every 47 days (before 50-day limit hits)
+#   2. Daily health check (restarts CQ if it stopped unexpectedly)
+#
+# The workflow:
+#   a) Lists all running BigQuery jobs
+#   b) Finds any with label managed_by = "$${cq_label_value}"
+#   c) Cancels them
+#   d) Creates a fresh Continuous Query job with the same label
+#
+# All values with $${ } are Terraform templatefile() substitutions.
+# All values with $$$${ } are Cloud Workflows runtime expressions.
+# ==============================================================
+
+main:
+  params: [args]
+  steps:
+    - log_start:
+        call: sys.log
+        args:
+          text: "Antigravity CQ Manager: starting lifecycle check"
+          severity: INFO
+
+    - list_running_jobs:
+        call: googleapis.bigquery.v2.jobs.list
+        args:
+          projectId: "${project_id}"
+          stateFilter: running
+          maxResults: 100
+        result: running_jobs_response
+
+    - check_jobs_present:
+        switch:
+          - condition: '$${not("jobs" in running_jobs_response)}'
+            next: log_no_jobs
+
+    - cancel_existing_cq:
+        for:
+          value: job
+          in: '$${running_jobs_response.jobs}'
+          steps:
+            - check_cq_label:
+                switch:
+                  - condition: >-
+                      $${
+                        "labels" in job and
+                        default(map.get(job.labels, "managed_by"), "") == "${cq_label_value}"
+                      }
+                    steps:
+                      - do_cancel:
+                          call: googleapis.bigquery.v2.jobs.cancel
+                          args:
+                            projectId: "${project_id}"
+                            jobId: '$${job.jobReference.jobId}'
+                          result: cancel_result
+                      - log_cancelled:
+                          call: sys.log
+                          args:
+                            text: '$${"Cancelled CQ job: " + job.jobReference.jobId}'
+                            severity: INFO
+        next: create_new_cq
+
+    - log_no_jobs:
+        call: sys.log
+        args:
+          text: "No running jobs found — CQ is down. Proceeding to create."
+          severity: WARNING
+
+    - create_new_cq:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+          projectId: "${project_id}"
+          body:
+            configuration:
+              query:
+                query: >-
+                  INSERT INTO `${project_id}.${streaming_dataset}.stg_telemetry_stream`
+                  SELECT id AS event_id, vessel_id, location_id,
+                  (raw_force_reading / 9.80665) AS gravity_g,
+                  TIMESTAMP(event_time) AS observed_at,
+                  CURRENT_TIMESTAMP() AS processed_at
+                  FROM APPENDS(TABLE `${project_id}.${streaming_dataset}.raw_telemetry_stream`, NULL)
+                useLegacySql: false
+                continuous: true
+                connectionProperty: []
+            jobReference:
+              projectId: "${project_id}"
+              jobId: '$${"antigravity-cq-" + string(int(sys.now()))}'
+            labels:
+              managed_by: "${cq_label_value}"
+              pipeline: antigravity
+              layer: silver
+        result: new_job
+
+    - log_complete:
+        call: sys.log
+        args:
+          text: '$${"CQ restart complete. New job ID: " + new_job.jobReference.jobId}'
+          severity: INFO
+
+    - return_job_id:
+        return: '$${new_job.jobReference.jobId}'

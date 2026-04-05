@@ -78,3 +78,50 @@ sources:
           - name: facility_type
             description: "Type of facility (Ground, Orbital, etc)."
             data_type: string
+
+  - name: streaming_layer
+    description: "Real-time streaming tables populated by Pub/Sub → BigQuery subscription and Continuous Query."
+    database: "{{ env_var('GCP_PROJECT_ID', '') }}"
+    schema: "streaming"
+    tables:
+      - name: raw_telemetry_stream
+        description: "Bronze landing table. Populated by Pub/Sub BigQuery native subscription."
+        columns:
+          - name: id
+            description: "Unique event ID published by the generator."
+            data_type: int64
+          - name: vessel_id
+            description: "Vessel identifier (FK → dim_vessels)."
+            data_type: string
+          - name: raw_force_reading
+            description: "Unscaled force reading (m/s²)."
+            data_type: float64
+          - name: location_id
+            description: "Location identifier (FK → dim_locations)."
+            data_type: string
+          - name: event_time
+            description: "ISO 8601 UTC timestamp string from the generator."
+            data_type: string
+
+      - name: stg_telemetry_stream
+        description: "Silver streaming table. Populated by BigQuery Continuous Query from raw_telemetry_stream."
+        columns:
+          - name: event_id
+            description: "Normalised event ID."
+            data_type: int64
+          - name: vessel_id
+            description: "Vessel identifier."
+            data_type: string
+          - name: location_id
+            description: "Location identifier."
+            data_type: string
+          - name: gravity_g
+            description: "Force reading in Standard Gravity (G)."
+            data_type: float64
+          - name: observed_at
+            description: "Parsed event timestamp."
+            data_type: timestamp
+          - name: processed_at
+            description: "CQ processing timestamp."
+            data_type: timestamp
+

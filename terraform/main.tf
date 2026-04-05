@@ -40,8 +40,9 @@ resource "google_composer_environment" "antigravity_env" {
         "python-dotenv"     = "~=1.0.1"
       }
       env_variables = {
-        "GCP_PROJECT_ID" = var.project_id
-        "GCP_SCHEMA"     = "main"
+        "GCP_PROJECT_ID"    = var.project_id
+        "GCP_SCHEMA"        = "main"
+        "STREAMING_ENABLED" = "true"
       }
     }
 

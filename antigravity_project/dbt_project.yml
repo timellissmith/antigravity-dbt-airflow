@@ -31,3 +31,9 @@ models:
 tests:
   antigravity_project:
     +tags: ["prod_test"]
+
+# Streaming models: thin views over infrastructure-managed tables.
+# Excluded from standard batch runs; included only when streaming infra is available.
+# Run with: dbtf run --select tag:streaming
+# Exclude with: dbtf run --exclude tag:streaming
+
