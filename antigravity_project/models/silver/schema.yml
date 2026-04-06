@@ -116,3 +116,24 @@ unit_tests:
     expect:
       rows:
         - {gravity_g: 1.0, event_id: 1}
+
+  - name: stg_api_telemetry
+    description: "Standardized telemetry from the parallel API ingestion framework."
+    config:
+      tags: ["api_ingestion"]
+    columns:
+      - name: event_id
+        description: "Unique event identifier from the API."
+        tests:
+          - unique
+          - not_null
+      - name: stream_type
+        description: "Type of telemetry stream (fraud, audit, access)."
+      - name: measure_value
+        description: "Primary value from the unnested JSON payload."
+      - name: event_message
+        description: "Message content from the unnested JSON payload."
+      - name: observed_at
+        description: "Timestamp of the event (converted from Unix)."
+      - name: ingested_at
+        description: "Timestamp when the record was ingested by Airflow."

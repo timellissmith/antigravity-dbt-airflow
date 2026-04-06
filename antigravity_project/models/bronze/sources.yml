@@ -125,3 +125,15 @@ sources:
             description: "CQ processing timestamp."
             data_type: timestamp
 
+
+  - name: api_ingestion
+    description: "Raw tables populated by the Python-based API Ingestion Framework."
+    database: "{{ env_var('GCP_PROJECT_ID', '') }}"
+    schema: "raw"
+    tables:
+      - name: telemetry_fraud
+        description: "Fraud detection telemetry stream."
+      - name: telemetry_audit
+        description: "Audit logging telemetry stream."
+      - name: telemetry_access
+        description: "Access control telemetry stream."

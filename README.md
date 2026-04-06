@@ -25,6 +25,9 @@ The project follows a **Medallion Architecture**:
     - `dim_vessels`: Vessel attributes and calculated age.
     - `dim_locations`: Research facility details.
     - `fct_levitation_events`: Enriched fact table mapping events to vessels, locations, and lead researchers.
+4.  **Generic API Layer (Dynamic)**: High-performance, memory-safe framework for parallel API ingestion.
+    - `raw.telemetry_*`: Dynamically created landing tables for diverse external streams (Fraud, Audit, Access).
+    - `etl_watermarks`: Control table tracking incremental cursors/states for all mapped streams.
 
 ---
 
@@ -50,6 +53,25 @@ This project includes a real-time ingestion layer for vessel telemetry.
 | `make stream-cq-status` | Checks if the continuous query job is currently running. |
 | `make stream-cq-restart` | Manually triggers the CQ lifecycle workflow. |
 | `make stream-cq-stop` | Identifies and cancels all running continuous query jobs. |
+| `make stream-mock-api` | Starts the local FastAPI mock server for telemetry simulation. |
+
+---
+
+## Generic API Ingestion Framework
+
+This framework utilizes **Airflow Dynamic Task Mapping** to ingest data from multiple external API endpoints concurrently.
+
+### Key Features
+- **Memory-Safe Extraction**: Streams API responses directly to local NDJSON chunks, maintaining a flat ~4MB memory profile.
+- **Dynamic Scaling**: Uses `.expand_kwargs()` to automatically spin up parallel tasks based on configurations stored in BigQuery.
+- **Lazy Sanitization**: Employs **Polars** for high-speed, lazy data enrichment (injecting ingest timestamps) before GCS upload.
+- **Automated Auth**: A custom `TelemetryAuthHook` manages Bearer tokens and handles automatic 401 refreshes.
+- **Silver Layer (Unnesting)**: An incremental dbt model (`stg_api_telemetry`) automatically unnests complex JSON payloads from the raw tables, providing a structured schema for analysis.
+
+### Local Mocking & Testing
+For development, a standalone **FastAPI** mock server (`streaming/mock_api.py`) simulates the vendor's behavior, including deterministic cursor-based pagination.
+- **Start the Mock API**: `make stream-mock-api` (Port 8000)
+- **DAG**: `telemetry_ingestion_parallel`
 
 ---
 
@@ -177,3 +199,4 @@ The CI/CD pipeline (`ci/dagger_pipeline.py`) has been upgraded to support **dbt-
 - **Fusion Compatibility**: Simplified date-math logic in `dim_vessels` and `dim_researchers` to ensure compatibility with the `dbt-fusion` 2.0 parser.
 - **Makefile Usability**: Running `make` without arguments now displays a formatted help screen with all available targets.
 - **Devcontainer Fix**: Resolved an installation hang by removing redundant features and refining the `Dockerfile` permission model.
+- **Agentic Governance**: The project uses specialized AI agents (defined in `AGENTS.md`) for automated testing, secret scanning, and Makefile maintenance.

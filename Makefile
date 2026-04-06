@@ -56,9 +56,37 @@ STREAM_TARGETS = \
 	-target=google_bigquery_reservation.streaming_reservation \
 	-target=google_bigquery_reservation_assignment.streaming_assignment
 
+# API Ingestion Framework resources (RAW layer)
+INGESTION_TARGETS = \
+	-target=google_bigquery_dataset.raw \
+	-target=google_bigquery_table.etl_watermarks \
+	-target=google_bigquery_table.raw_telemetry_mapped \
+	-target=google_storage_bucket.telemetry_stating
+
 # ── General Operations ─────────────────────────────────────────
 
-.PHONY: help install dbt-run dbt-test dbt-build airflow-trigger test-e2e clean check-env
+.PHONY: help install dbt-run dbt-test dbt-build airflow-trigger airflow-start airflow-stop airflow-setup test-e2e clean check-env
+
+airflow-setup: ## Initialize Airflow connections
+	@echo "Configuring Airflow connections..."
+	@airflow connections add 'google_cloud_default' \
+		--conn-type 'google_cloud_platform' \
+		--conn-extra '{"project": "$(GCP_PROJECT_ID)", "key_path": ""}' || true
+	@airflow connections add 'telemetry_api_auth' \
+		--conn-type 'generic' \
+		--conn-host 'http://localhost:8000' \
+		--login 'demo_client' \
+		--password 'demo_secret' || true
+
+airflow-start: airflow-setup ## Start local Airflow standalone in background
+	@echo "Starting Airflow standalone..."
+	@nohup airflow standalone > /home/vscode/airflow/standalone.log 2>&1 &
+	@echo "Airflow started. Check /home/vscode/airflow/standalone.log for logs."
+
+airflow-stop: ## Stop all local Airflow processes
+	@echo "Stopping Airflow..."
+	@pkill -f airflow || true
+	@echo "Airflow stopped."
 
 check-env: ## Verify environment variable resolution
 	@echo "GCP_PROJECT_ID: $(GCP_PROJECT_ID)"
@@ -139,6 +167,16 @@ stream-infra-apply: ## Deploy streaming infrastructure and bootstrap the Continu
 		-var="project_id=$(STREAM_PROJECT)" \
 		$(STREAM_TARGETS)
 
+ingestion-infra-plan: ## Preview API ingestion infrastructure changes
+	terraform -chdir=terraform plan \
+		-var="project_id=$(STREAM_PROJECT)" \
+		$(INGESTION_TARGETS)
+
+ingestion-infra-apply: ## Deploy API ingestion infrastructure (Landing Dataset, Watermarks, GCS Bucket)
+	terraform -chdir=terraform apply -auto-approve \
+		-var="project_id=$(STREAM_PROJECT)" \
+		$(INGESTION_TARGETS)
+
 stream-infra-destroy: ## Destroy all streaming infrastructure (irreversible)
 	@echo "WARNING: This will delete all streaming tables and data!"
 	terraform -chdir=terraform destroy -auto-approve \
@@ -172,13 +210,13 @@ stream-cq-status: ## Check status of the running Continuous Query job
 
 stream-cq-stop: ## Stop all running continuous queries for this pipeline
 	@echo "Identifying and stopping running continuous queries..."
-	@bq query --use_legacy_sql=false --format=csv \
+	@bq query --use_legacy_sql=false --format=csv --no_heading \
 		"SELECT job_id \
 		 FROM \`$(STREAM_PROJECT).region-$(GCP_REGION).INFORMATION_SCHEMA.JOBS\` \
 		 WHERE creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 day) \
 		   AND continuous IS TRUE \
-		   AND state = 'RUNNING'" | tail -n +2 | \
-	 xargs -I {} -r bq cancel --project_id=$(STREAM_PROJECT) --location=$(GCP_REGION) {} || true
+		   AND state = 'RUNNING'" | \
+	 xargs -I {} bq cancel --project_id=$(STREAM_PROJECT) {}
 
 dbt-streaming: ## Run streaming-tagged dbt models (requires streaming infra to be deployed)
 	STREAMING_ENABLED=true $(DBT) run --project-dir $(DBT_PROJECT_DIR) --select tag:streaming
@@ -189,3 +227,6 @@ dbt-streaming-test: ## Test streaming-tagged dbt models
 test-streaming: ## Run streaming unit tests (no GCP required)
 	CI=false pytest tests/test_streaming.py -v -k "not Integration"
 
+stream-mock-api: ## Start local FastAPI mock server for telemetry simulation
+	@echo "Starting Telemetry Mock API..."
+	python3 streaming/mock_api.py
