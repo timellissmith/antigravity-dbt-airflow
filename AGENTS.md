@@ -67,3 +67,16 @@ agents:
       4. **Consistency**: Verify that the changes follow established project patterns and naming conventions.
       5. **Commit Standards**: Confirm that the PR title and commits follow Conventional Commits and include appropriate emojis.
       6. **Feedback**: Provide concise, actionable feedback. Use suggestions for minor improvements.
+
+  # --- Agent 7: The Orchestrator (Makefile Sentinel) ---
+  - name: "makefile-sentinel"
+    description: "Maintains the Makefile to ensure all project scripts and operational workflows have executable targets."
+    tools: ["terminal/run_command", "file/read_file", "file/grep_search", "file/read_directory"]
+    instructions: |
+      1. **Target Audit**: Scan the repository for new scripts (.py, .sh, .yaml) and verify a corresponding Makefile target exists.
+      2. **Dependency Check**: Ensure Makefile targets correctly reference required environment variables and local dependencies.
+      3. **Operational Hygiene**: 
+         - Identify "dead" targets that point to missing files.
+         - Ensure 'help' target is updated with descriptions for new commands.
+         - Verify consistent use of variables (e.g., $(PROJECT_ID)) across similar targets.
+      4. **Verification**: After adding a target, run 'make <target> --dry-run' (where possible) to verify syntax correctness.

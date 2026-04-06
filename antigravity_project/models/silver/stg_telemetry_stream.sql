@@ -10,7 +10,7 @@
   populated in real-time by a BigQuery Continuous Query (managed by Terraform).
 
   dbt's role here is documentation + testing only — the CQ does the transform.
-  The view allows gold models to reference streaming silver via {{ ref() }}.
+  The view allows gold models to reference streaming silver via `ref('stg_telemetry_stream')`.
 */
 SELECT
     event_id,

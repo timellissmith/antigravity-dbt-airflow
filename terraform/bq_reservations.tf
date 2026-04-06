@@ -19,9 +19,8 @@ resource "google_bigquery_reservation" "streaming_reservation" {
   edition  = "ENTERPRISE"
   
   # Use autoscaling to minimize costs when queries are idle.
-  # Continuous queries will scale up to 100 slots as needed.
-  # A baseline of at least 1 slot is required to start the job.
-  slot_capacity = 1
+  # Slots must be reserved in increments of 50.
+  slot_capacity = 0
   autoscale {
     max_slots = 100
   }
