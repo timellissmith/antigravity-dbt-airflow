@@ -1,4 +1,13 @@
-{{ config(materialized='table', tags=["deploy"]) }}
+{{ config(
+    materialized='table',
+    tags=["deploy"],
+    partition_by={
+      "field": "joined_at",
+      "data_type": "timestamp",
+      "granularity": "day"
+    },
+    cluster_by=["specialization"]
+) }}
 
 SELECT
     researcher_id,

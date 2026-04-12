@@ -2,10 +2,11 @@
 .DEFAULT_GOAL := help
 
 # Variables
-DBT = dbtf
+DBT := $(shell which dbtf 2>/dev/null || ( [ -f .venv/bin/dbt ] && echo .venv/bin/dbt ) || which dbt 2>/dev/null || echo dbt)
 DBT_PROJECT_DIR = antigravity_project
 TEST_DIR = tests
 DAG_ID = antigravity_pipeline
+PYTHON := $(shell ([ -f .venv/bin/python ] && echo .venv/bin/python) || which python3 2>/dev/null || echo python)
 
 # Load environment variables from .env file if it exists
 ifneq (,$(wildcard ./.env))
@@ -65,7 +66,7 @@ INGESTION_TARGETS = \
 
 # ── General Operations ─────────────────────────────────────────
 
-.PHONY: help install dbt-run dbt-test dbt-build airflow-trigger airflow-start airflow-stop airflow-setup test-e2e clean check-env
+.PHONY: help install dbt-run dbt-test dbt-build dbt-docs-generate dbt-docs-serve dbt-mock airflow-trigger airflow-start airflow-stop airflow-setup test-e2e clean check-env
 
 airflow-setup: ## Initialize Airflow connections
 	@echo "Configuring Airflow connections..."
@@ -133,6 +134,25 @@ dbt-test: ## Run dbt generic and unit tests
 dbt-build: ## Execute dbt build (seeds, models, snapshots, and tests)
 	$(DBT) seed --project-dir $(DBT_PROJECT_DIR)
 	$(DBT) build --project-dir $(DBT_PROJECT_DIR)
+
+dbt-docs-generate: ## Generate dbt documentation
+	$(DBT) docs generate --project-dir $(DBT_PROJECT_DIR)
+
+dbt-docs-serve: dbt-docs-generate ## Serve dbt documentation locally on port 8081
+	$(DBT) docs serve --project-dir $(DBT_PROJECT_DIR) --port 8081
+
+dbt-mock: ## Generate mock data programmatically via LLM
+	@if [ -z "$(MODEL)" ]; then echo "Missing MODEL=... parameter"; exit 1; fi
+	@if [ -z "$(GEMINI_API_KEY)" ]; then echo "Missing GEMINI_API_KEY in .env file"; exit 1; fi
+	$(PYTHON) scripts/ai_tools/dbt_mock_generator.py --model $(MODEL)
+
+dbt-optimize: ## Optimize dbt models for BigQuery via LLM
+	@if [ -z "$(MODEL_PATH)" ]; then \
+		echo "Missing MODEL_PATH=... parameter (relative to project root, e.g. models/gold/fct_levitation_events.sql)"; \
+		exit 1; \
+	fi
+	@if [ -z "$(GEMINI_API_KEY)" ]; then echo "Missing GEMINI_API_KEY in .env file"; exit 1; fi
+	$(PYTHON) scripts/ai_tools/bq_optimizer.py --model-path $(DBT_PROJECT_DIR)/$(MODEL_PATH)
 
 airflow-trigger: ## Trigger the main Airflow pipeline DAG
 	airflow dags trigger $(DAG_ID)

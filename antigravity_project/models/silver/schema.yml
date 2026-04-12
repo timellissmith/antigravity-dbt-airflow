@@ -94,8 +94,9 @@ models:
         tests:
           - not_null
           - dbt_expectations.expect_column_values_to_be_between:
-              min_value: -2
-              max_value: 10
+              arguments:
+                min_value: -2
+                max_value: 10
       - name: observed_at
         description: "Parsed event timestamp from the generator."
         tests:
@@ -104,18 +105,6 @@ models:
         description: "Timestamp when the Continuous Query processed this row."
         tests:
           - not_null
-
-unit_tests:
-
-  - name: test_gravity_standardization
-    model: stg_telemetry
-    given:
-      - input: source('raw_layer', 'raw_telemetry')
-        rows:
-          - {raw_force_reading: 9.80665, id: 1, vessel_id: 'V001', location_id: 'L001', event_time: '2026-03-18 20:00:00'}
-    expect:
-      rows:
-        - {gravity_g: 1.0, event_id: 1}
 
   - name: stg_api_telemetry
     description: "Standardized telemetry from the parallel API ingestion framework."
@@ -137,3 +126,17 @@ unit_tests:
         description: "Timestamp of the event (converted from Unix)."
       - name: ingested_at
         description: "Timestamp when the record was ingested by Airflow."
+
+unit_tests:
+
+  - name: test_gravity_standardization
+    model: stg_telemetry
+    given:
+      - input: source('raw_layer', 'raw_telemetry')
+        rows:
+          - {raw_force_reading: 9.80665, id: 1, vessel_id: 'V001', location_id: 'L001', event_time: '2026-03-18 20:00:00'}
+    expect:
+      rows:
+        - {gravity_g: 1.0, event_id: 1}
+
+
