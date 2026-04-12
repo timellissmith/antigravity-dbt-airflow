@@ -109,24 +109,36 @@ The dbt project is located in the `antigravity_project/` directory.
 ### Deploying Seeds
 To load the raw research data into your BigQuery environment, run:
 ```bash
-cd antigravity_project
-dbtf seed --target dev
+make dbt-seed
+```
+
+### Serving Documentation
+dbt documentation is served locally on **port 8081** to avoid conflicts with Airflow.
+```bash
+make dbt-docs-serve
 ```
 
 ## Testing Strategy
 
 This project implements testing at multiple levels:
 
-### 1. dbt-fusion Unit Tests
+### 1. dbt Unit Tests
 Used to validate transformation logic in models without requiring a database connection.
 - Defined in `models/silver/schema.yml`.
-- Run using: `dbtf test --select test_type:unit`
+- Run using: `make dbt-test`
 
-### 2. dbt-fusion Data Tests
+### 2. dbt Data Tests
 Generic and singular tests to ensure data quality (unique, not_null, and `dbt_expectations`).
-- Run using: `dbtf test --exclude test_type:unit`
+- Run using: `make dbt-test`
 
-### 3. Airflow DAG Tests (pytest)
+### 3. AI-Assisted Development
+This repository is augmented with a dual-layered AI workflow:
+- **Agents**: Specialized conversational agents are defined in `AGENTS.md` to assist with planning, testing, and optimization.
+- **programmatic CLI Tools**: Python scripts in `scripts/ai_tools/` utilize the Gemini API for automated tasks.
+    - `make dbt-mock MODEL=<model_name>`: Generates realistic CSV seed data for any model schema.
+    - `make dbt-optimize MODEL_PATH=<path_to_sql>`: Injects BigQuery-specific optimizations (partitioning/clustering) into your models.
+
+### 4. Airflow DAG Tests (pytest)
 A `pytest` suite in `tests/test_dags.py` validates:
 - DAG loading and integrity (DagBag).
 - Task structure and dependencies.
@@ -150,6 +162,11 @@ This project uses `python-dotenv` to manage environment variables. A template is
     -   The Dagger CI pipeline (`dagger_pipeline.py`).
 
 Run `make check-env` to verify your current settings.
+
+### AI Configuration (Gemini)
+To use the AI optimization and mock generation tools, you must provide a Gemini API Key:
+1.  Obtain a key from [Google AI Studio](https://aistudio.google.com/).
+2.  Add it to your `.env` file: `GEMINI_API_KEY=your_key_here`.
 
 ## Infrastructure as Code (Terraform)
 
@@ -176,7 +193,7 @@ Use the following `make` targets to manage infrastructure:
 
 The deployment pipeline (`ci/deploy_pipeline.py`) includes multiple validation layers:
 1.  **DAG Integrity**: Runs `pytest tests/test_dags.py` to catch syntax or Airflow import errors.
-2.  **Shadow Build**: Executes `dbtf build --target prod` to verify transformation logic against real BigQuery data.
+2.  **Shadow Build**: Executes `make dbt-build` to verify transformation logic against real BigQuery data.
 3.  **Data Regression**: Runs `pytest tests/regression_tests.py` to ensure:
     -   Key tables are not empty.
     -   Fact tables have no null keys.
@@ -187,7 +204,7 @@ The deployment pipeline (`ci/deploy_pipeline.py`) includes multiple validation l
 The CI/CD pipeline (`ci/dagger_pipeline.py`) has been upgraded to support **dbt-fusion**.
 
 ### Key Improvements
-- **Fusion Engine**: Uses `dbtf` for high-performance builds and unit testing.
+- **Automation Engine**: Uses `make` targets for consistent builds and unit testing across local and CI environments.
 - **Environment Parity**: Automatically loads `.env` variables using `override=True` to ensure local Dagger runs match project settings.
 - **Dependency Handling**: The CI container now includes `jq` and correctly configured shell aliases for the Fusion CLI.
 
