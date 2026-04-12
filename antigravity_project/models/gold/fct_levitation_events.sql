@@ -1,4 +1,19 @@
-{{ config(materialized='table', tags=["deploy"]) }}
+{{ config(
+    materialized='table',
+    tags=["deploy"],
+    -- OPTIMIZATION: Partitioning by a timestamp is excellent for time-series data,
+    -- allowing for efficient pruning in queries that filter by date ranges.
+    partition_by={
+      "field": "observed_at",
+      "data_type": "timestamp",
+      "granularity": "day"
+    },
+    -- OPTIMIZATION: Clustering is updated to use the high-cardinality join keys
+    -- (`location_id`, `vessel_id`) first. This significantly improves join performance
+    -- by co-locating related records. `vessel_type` is included as a common
+    -- low-cardinality filter column.
+    cluster_by=["location_id", "vessel_id", "vessel_type"]
+) }}
 
 /*
   Unified levitation events fact table.
@@ -13,26 +28,55 @@
 {% set streaming_enabled = env_var('STREAMING_ENABLED', 'false') == 'true' %}
 
 WITH telemetry AS (
-    SELECT event_id, vessel_id, location_id, gravity_g, observed_at, 'batch' AS ingestion_mode
+    SELECT
+        event_id,
+        vessel_id,
+        location_id,
+        gravity_g,
+        observed_at,
+        'batch' AS ingestion_mode
     FROM {{ ref('stg_telemetry') }}
 
     {% if streaming_enabled %}
     UNION ALL
-    SELECT event_id, vessel_id, location_id, gravity_g, observed_at, 'stream' AS ingestion_mode
+    SELECT
+        event_id,
+        vessel_id,
+        location_id,
+        gravity_g,
+        observed_at,
+        'stream' AS ingestion_mode
     FROM {{ ref('stg_telemetry_stream') }}
     {% endif %}
 ),
 
+-- OPTIMIZATION: Select only the columns needed from the dimension tables.
+-- This reduces the amount of data that BigQuery needs to scan and shuffle during joins.
 researchers AS (
-    SELECT * FROM {{ ref('dim_researchers') }}
+    SELECT
+        researcher_id,
+        full_name,
+        specialization,
+        assigned_vessel_id,
+        tenure_days
+    FROM {{ ref('dim_researchers') }}
 ),
 
 vessels AS (
-    SELECT * FROM {{ ref('dim_vessels') }}
+    SELECT
+        vessel_id,
+        vessel_name,
+        vessel_type,
+        age_days
+    FROM {{ ref('dim_vessels') }}
 ),
 
 locations AS (
-    SELECT * FROM {{ ref('dim_locations') }}
+    SELECT
+        location_id,
+        location_name,
+        region
+    FROM {{ ref('dim_locations') }}
 )
 
 SELECT
@@ -57,5 +101,6 @@ FROM telemetry t
 LEFT JOIN vessels v ON t.vessel_id = v.vessel_id
 LEFT JOIN locations l ON t.location_id = l.location_id
 LEFT JOIN researchers r ON t.vessel_id = r.assigned_vessel_id
--- Pick the most-tenured researcher per vessel if multiple assignments exist
+-- Pick the most-tenured researcher per vessel if multiple assignments exist.
+-- The QUALIFY clause is a highly efficient BigQuery-native way to filter window function results.
 QUALIFY ROW_NUMBER() OVER (PARTITION BY t.event_id, t.ingestion_mode ORDER BY r.tenure_days DESC) = 1

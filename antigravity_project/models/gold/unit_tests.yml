@@ -24,6 +24,34 @@ unit_tests:
       rows:
         - {event_id: 101, vessel_name: 'Test Vessel', location_name: 'Test Lab', lead_researcher: 'Test Scientist', is_levitation_event: true}
 
+  - name: test_fct_levitation_events_streaming
+    description: "Verify that stream events are included when STREAMING_ENABLED=true."
+    model: fct_levitation_events
+    overrides:
+      macros:
+        is_incremental: false
+      env_vars:
+        STREAMING_ENABLED: 'true'
+    given:
+      - input: ref('stg_telemetry')
+        rows: []
+      - input: ref('stg_telemetry_stream')
+        format: dict
+        rows:
+          - {event_id: 102, vessel_id: 'V_TEST', location_id: 'L_TEST', gravity_g: 0.05, observed_at: '2026-03-20 12:05:00', processed_at: '2026-03-20 12:05:05'}
+      - input: ref('dim_vessels')
+        rows:
+          - {vessel_id: 'V_TEST', vessel_name: 'Test Vessel', age_days: 100}
+      - input: ref('dim_locations')
+        rows:
+          - {location_id: 'L_TEST', location_name: 'Test Lab', region: 'Test Region'}
+      - input: ref('dim_researchers')
+        rows:
+          - {researcher_id: 99, full_name: 'Test Scientist', assigned_vessel_id: 'V_TEST', tenure_days: 50}
+    expect:
+      rows:
+        - {event_id: 102, ingestion_mode: 'stream', is_levitation_event: true}
+
   - name: test_dim_researchers_full_name
     description: "Verify full name concatenation in dim_researchers."
     model: dim_researchers

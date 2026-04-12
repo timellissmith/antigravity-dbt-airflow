@@ -1,4 +1,8 @@
-{{ config(materialized='table', tags=["deploy"]) }}
+{{ config(
+    materialized='table',
+    tags=["deploy"],
+    cluster_by=["region", "facility_type"]
+) }}
 
 SELECT
     location_id,

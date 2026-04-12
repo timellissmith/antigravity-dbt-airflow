@@ -1,4 +1,13 @@
-{{ config(materialized='table', tags=["deploy"]) }}
+{{ config(
+    materialized='table',
+    tags=["deploy"],
+    partition_by={
+      "field": "commissioned_at",
+      "data_type": "timestamp",
+      "granularity": "day"
+    },
+    cluster_by=["vessel_type"]
+) }}
 
 SELECT
     vessel_id,
